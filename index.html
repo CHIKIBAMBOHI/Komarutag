@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Audio Player BASS BOOST</title>
+    <title>Audio Player</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -11,20 +11,17 @@
             display: flex; flex-direction: column; align-items: center;
             font-family: Arial, sans-serif;
         }
-
         .bg-layer {
             position: fixed; top: -10%; left: -10%; width: 120%; height: 120%;
             background-image: url('https://i.ytimg.com/vi/5aGBP6RbzFM/oar2.jpg?sqp=-oaymwEkCJUDENAFSFqQAgHyq4qpAxMIARUAAAAAJQAAyEI9AICiQ3gB&rs=AOn4CLA4Yff3St0fdipXY3DbX5eovS36pA');
             background-size: cover; background-position: center;
             filter: blur(45px) brightness(0.7); z-index: 1;
         }
-
         .ui-container {
             position: relative; z-index: 2; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: space-between; 
             align-items: center; padding: 8vh 0 5vh 0;
         }
-
         .main-circle {
             width: 280px; height: 280px; border-radius: 50%;
             border: 5px solid rgba(255, 255, 255, 0.9);
@@ -33,9 +30,7 @@
             cursor: pointer; box-shadow: 0 20px 60px rgba(0,0,0,0.7);
             transition: transform 0.1s ease; -webkit-tap-highlight-color: transparent;
         }
-
         .main-circle:active { transform: scale(0.95); }
-
         #muteBtn {
             display: none; width: 80%; max-width: 400px; padding: 18px 0;
             background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3);
@@ -43,16 +38,12 @@
             font-size: 16px; font-weight: bold; cursor: pointer;
             text-transform: uppercase; letter-spacing: 2px;
         }
-
         .show-mute { display: block !important; animation: fadeIn 0.6s ease forwards; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
-
     <div class="bg-layer"></div>
-
     <div class="ui-container">
         <div id="playBtn" class="main-circle"></div>
         <button id="muteBtn">Заглушить</button>
@@ -66,40 +57,29 @@
         const playBtn = document.getElementById('playBtn');
         const muteBtn = document.getElementById('muteBtn');
         const audio = document.getElementById('sound');
-
         let audioCtx;
         let isBoosted = false;
 
         playBtn.addEventListener('click', () => {
-            // Инициализируем бас только один раз при первом клике
             if (!isBoosted) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const source = audioCtx.createMediaElementSource(audio);
-
-                // Создаем фильтр низких частот (BASS BOOST)
                 const bassFilter = audioCtx.createBiquadFilter();
                 bassFilter.type = "lowshelf";
-                bassFilter.frequency.value = 200; // Частота, которую бустим
-                bassFilter.gain.value = 25;      // Сила баса (25 - это очень много!)
-
-                // Соединяем: Аудио -> Бас -> Выход
+                bassFilter.frequency.value = 200;
+                bassFilter.gain.value = 25; // Дикий басс тут
                 source.connect(bassFilter);
                 bassFilter.connect(audioCtx.destination);
-                
                 isBoosted = true;
             }
-
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+            
             audio.play();
             muteBtn.classList.add('show-mute');
         });
 
-        muteBtn.addEventListener('click', () => {
-            console.log("Звук с басом продолжает играть...");
-        });
+        // Кнопка-пустышка
+        muteBtn.addEventListener('click', () => { console.log("Silent but bassy"); });
     </script>
 </body>
 </html>
