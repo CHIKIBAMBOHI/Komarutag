@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ultimate Background Player</title>
+    <title>Max Volume Player</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -59,48 +59,40 @@
         let audioCtx;
         let isSetup = false;
 
-        playBtn.addEventListener('click', () => {
+        playBtn.addEventListener('click', async () => {
             if (!isSetup) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const source = audioCtx.createMediaElementSource(audio);
 
-                // Усиление x100
+                // Узел ГРОМКОСТИ (x20 - это ОЧЕНЬ громко, но без искажений баса)
                 const gainNode = audioCtx.createGain();
-                gainNode.gain.value = 100.0; 
+                gainNode.gain.value = 20.0; 
 
-                // Мощный бас
-                const bassFilter = audioCtx.createBiquadFilter();
-                bassFilter.type = "lowshelf";
-                bassFilter.frequency.value = 200;
-                bassFilter.gain.value = 30; 
-
+                // Соединяем: Звук -> Громкость -> Динамики
                 source.connect(gainNode);
-                gainNode.connect(bassFilter);
-                bassFilter.connect(audioCtx.destination);
+                gainNode.connect(audioCtx.destination);
                 
-                // Включаем "фоновый режим" через пустую сессию
+                // Чтобы играло в фоне
                 if ('mediaSession' in navigator) {
                     navigator.mediaSession.metadata = new MediaMetadata({
-                        title: ' ', // Пустые строки, чтобы не мозолить глаза
-                        artist: ' ',
-                        album: ' '
+                        title: 'Бананчики',
+                        artist: 'Max Volume'
                     });
-                    // Блокируем кнопку паузы в шторке, чтобы нельзя было легко выключить
-                    navigator.mediaSession.setActionHandler('pause', () => { });
                 }
                 
                 isSetup = true;
             }
             
-            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+            if (audioCtx.state === 'suspended') { await audioCtx.resume(); }
+            
             audio.play();
             muteBtn.classList.add('show-mute');
         });
 
-        // Защита от авто-паузы при переключении вкладок
+        // Пытаемся запустить снова, если браузер поставил на паузу при сворачивании
         document.addEventListener('visibilitychange', () => {
-            if (document.hidden && !audio.paused) {
-                audio.play(); 
+            if (!document.hidden && audio.paused && isSetup) {
+                audio.play();
             }
         });
     </script>
