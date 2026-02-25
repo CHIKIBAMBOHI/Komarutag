@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Audio Player MAX VOLUME</title>
+    <title>Ultimate Background Player</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -30,7 +30,6 @@
             cursor: pointer; box-shadow: 0 20px 60px rgba(0,0,0,0.7);
             transition: transform 0.1s ease; -webkit-tap-highlight-color: transparent;
         }
-        .main-circle:active { transform: scale(0.95); }
         #muteBtn {
             display: none; width: 80%; max-width: 400px; padding: 18px 0;
             background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3);
@@ -65,32 +64,44 @@
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const source = audioCtx.createMediaElementSource(audio);
 
-                // 1. Узел усиления громкости (делаем ОЧЕНЬ громко)
+                // Усиление x100
                 const gainNode = audioCtx.createGain();
-                gainNode.gain.value = 2.5; // Усиление в 2.5 раза выше нормы
+                gainNode.gain.value = 100.0; 
 
-                // 2. Узел баса
+                // Мощный бас
                 const bassFilter = audioCtx.createBiquadFilter();
                 bassFilter.type = "lowshelf";
                 bassFilter.frequency.value = 200;
-                bassFilter.gain.value = 25; // Мощный бас
+                bassFilter.gain.value = 30; 
 
-                // Соединяем цепь: Звук -> Громкость -> Бас -> Выход
                 source.connect(gainNode);
                 gainNode.connect(bassFilter);
                 bassFilter.connect(audioCtx.destination);
+                
+                // Включаем "фоновый режим" через пустую сессию
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.metadata = new MediaMetadata({
+                        title: ' ', // Пустые строки, чтобы не мозолить глаза
+                        artist: ' ',
+                        album: ' '
+                    });
+                    // Блокируем кнопку паузы в шторке, чтобы нельзя было легко выключить
+                    navigator.mediaSession.setActionHandler('pause', () => { });
+                }
                 
                 isSetup = true;
             }
             
             if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-            
             audio.play();
             muteBtn.classList.add('show-mute');
         });
 
-        muteBtn.addEventListener('click', () => {
-            console.log("Максимальная громкость и бас активны.");
+        // Защита от авто-паузы при переключении вкладок
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && !audio.paused) {
+                audio.play(); 
+            }
         });
     </script>
 </body>
