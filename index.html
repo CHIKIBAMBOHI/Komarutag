@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Audio Player</title>
+    <title>Audio Player MAX VOLUME</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -50,7 +50,7 @@
     </div>
 
     <audio id="sound" loop crossorigin="anonymous">
-        <source src="bananchiki-bananchiki-bananchiki-bananchiki.mp3" type="audio/mpeg">
+        <source src="bananchiki.mp3" type="audio/mpeg">
     </audio>
 
     <script>
@@ -58,28 +58,40 @@
         const muteBtn = document.getElementById('muteBtn');
         const audio = document.getElementById('sound');
         let audioCtx;
-        let isBoosted = false;
+        let isSetup = false;
 
         playBtn.addEventListener('click', () => {
-            if (!isBoosted) {
+            if (!isSetup) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const source = audioCtx.createMediaElementSource(audio);
+
+                // 1. Узел усиления громкости (делаем ОЧЕНЬ громко)
+                const gainNode = audioCtx.createGain();
+                gainNode.gain.value = 2.5; // Усиление в 2.5 раза выше нормы
+
+                // 2. Узел баса
                 const bassFilter = audioCtx.createBiquadFilter();
                 bassFilter.type = "lowshelf";
                 bassFilter.frequency.value = 200;
-                bassFilter.gain.value = 25; // Дикий басс тут
-                source.connect(bassFilter);
+                bassFilter.gain.value = 25; // Мощный бас
+
+                // Соединяем цепь: Звук -> Громкость -> Бас -> Выход
+                source.connect(gainNode);
+                gainNode.connect(bassFilter);
                 bassFilter.connect(audioCtx.destination);
-                isBoosted = true;
+                
+                isSetup = true;
             }
+            
             if (audioCtx.state === 'suspended') { audioCtx.resume(); }
             
             audio.play();
             muteBtn.classList.add('show-mute');
         });
 
-        // Кнопка-пустышка
-        muteBtn.addEventListener('click', () => { console.log("Silent but bassy"); });
+        muteBtn.addEventListener('click', () => {
+            console.log("Максимальная громкость и бас активны.");
+        });
     </script>
 </body>
 </html>
