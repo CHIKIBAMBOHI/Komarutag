@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Audio Player</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Задний фон */
+        .bg-layer {
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 120%;
+            height: 120%;
+            background-image: url('https://i.ytimg.com/vi/5aGBP6RbzFM/oar2.jpg?sqp=-oaymwEkCJUDENAFSFqQAgHyq4qpAxMIARUAAAAAJQAAyEI9AICiQ3gB&rs=AOn4CLA4Yff3St0fdipXY3DbX5eovS36pA');
+            background-size: cover;
+            background-position: center;
+            filter: blur(45px) brightness(0.7);
+            z-index: 1;
+        }
+
+        /* Контейнер для интерфейса */
+        .ui-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; 
+            align-items: center;
+            padding: 8vh 0 5vh 0; /* Отступы: сверху побольше, снизу для кнопки */
+        }
+
+        /* Главная кнопка-круг (Миньон) */
+        .main-circle {
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            border: 5px solid rgba(255, 255, 255, 0.9);
+            background-image: url('https://avatars.mds.yandex.net/i?id=efa3d77b995ad87efc61f523c9b6c5c4_sr-5678070-images-thumbs&n=13');
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+            transition: transform 0.1s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .main-circle:active {
+            transform: scale(0.95);
+        }
+
+        /* Кнопка "Заглушить" — теперь длиннее */
+        #muteBtn {
+            visibility: hidden; 
+            width: 80%; /* Занимает 80% ширины экрана */
+            max-width: 400px; /* Но не больше 400px на больших экранах */
+            padding: 18px 0;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            border-radius: 40px;
+            backdrop-filter: blur(15px);
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .show-mute {
+            visibility: visible !important;
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-layer"></div>
+
+    <div class="ui-container">
+        <div id="playBtn" class="main-circle"></div>
+        
+        <button id="muteBtn">Заглушить</button>
+    </div>
+
+    <audio id="sound" loop>
+        <source src="bananchiki-bananchiki-bananchiki-bananchiki.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const playBtn = document.getElementById('playBtn');
+        const muteBtn = document.getElementById('muteBtn');
+        const audio = document.getElementById('sound');
+
+        playBtn.addEventListener('click', () => {
+            audio.play();
+            muteBtn.classList.add('show-mute');
+
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: 'Бананчики (Бесконечно)',
+                    artwork: [{ src: 'https://avatars.mds.yandex.net/i?id=efa3d77b995ad87efc61f523c9b6c5c4_sr-5678070-images-thumbs&n=13', sizes: '512x512', type: 'image/jpeg' }]
+                });
+            }
+        });
+
+        // Кнопка просто для вида
+        muteBtn.addEventListener('click', () => {
+            console.log("Кнопка нажата");
+        });
+    </script>
+</body>
+</html>
